@@ -298,6 +298,7 @@
   </div>
 </template>
 <script setup lang="ts">
+
 // Uncomment these if you're using Firebase
 // import {
 //   getAuth,
@@ -306,6 +307,10 @@
 //   GoogleAuthProvider,
 //   signInWithPopup,
 // } from 'firebase/auth'
+
+definePageMeta({
+  layout: 'blank'
+})
 
 // Define reactive state for the active tab with TypeScript type
 const activeTab = ref<"login" | "register">("login");

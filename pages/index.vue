@@ -1,27 +1,5 @@
 <template>
   <div class="min-h-screen flex flex-col">
-    <!-- Header -->
-    <header class="bg-white shadow-sm">
-      <div
-        class="container mx-auto px-4 py-4 flex justify-between items-center"
-      >
-        <!-- Logo -->
-        <div class="flex items-center">
-          <svg
-            class="w-8 h-8 text-sky-500"
-            fill="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path d="M12 2L1 12h3v9h6v-6h4v6h6v-9h3L12 2z" />
-          </svg>
-          <span class="ml-2 text-xl font-bold text-gray-800">ReadFast</span>
-        </div>
-
-        <!-- Auth State -->
-        <AuthState :user="user" @login="handleLogin" />
-      </div>
-    </header>
-
     <!-- Hero Section -->
     <section class="bg-gradient-to-r from-blue-50 to-indigo-100 py-16">
       <div class="container mx-auto px-4 text-center">
@@ -86,7 +64,6 @@
 
 <script setup lang="ts">
 import { ref } from "vue";
-import type { User } from "firebase/auth";
 
 // Mock data - replace with real data fetching
 const topics = ref([
@@ -121,7 +98,6 @@ const languages = ref([
 // State
 const selectedTopic = ref<number | null>(null);
 const selectedLanguage = ref<string | null>(null);
-const user = ref<User | null>(null); // Replace with real auth state
 
 // Methods
 const handleLogin = () => {
@@ -137,7 +113,9 @@ const startTest = () => {
       language: selectedLanguage.value,
     });
     // Navigate to test page
-    // navigateTo(`/test?topic=${selectedTopic.value}&lang=${selectedLanguage.value}`)
+    navigateTo(
+      `/test?topic=${selectedTopic.value}&lang=${selectedLanguage.value}`
+    );
   }
 };
 </script>
