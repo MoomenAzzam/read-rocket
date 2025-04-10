@@ -298,7 +298,6 @@
   </div>
 </template>
 <script setup lang="ts">
-
 // Uncomment these if you're using Firebase
 // import {
 //   getAuth,
@@ -307,10 +306,11 @@
 //   GoogleAuthProvider,
 //   signInWithPopup,
 // } from 'firebase/auth'
-
 definePageMeta({
-  layout: 'blank'
-})
+  layout: "blank",
+});
+
+const authStore = useAuthStore();
 
 // Define reactive state for the active tab with TypeScript type
 const activeTab = ref<"login" | "register">("login");
@@ -337,23 +337,22 @@ const registerForm = ref({
 // Handle login submission
 const handleLogin = async () => {
   // Uncomment and implement with Firebase if needed
-  /*
   if (!loginForm.value.email || !loginForm.value.password) {
-    error.value = 'Please fill in all fields'
-    return
+    error.value = "Please fill in all fields";
+    return;
   }
-  loading.value = true
-  error.value = null
+  loading.value = true;
+  error.value = null;
   try {
-    const auth = getAuth()
-    await signInWithEmailAndPassword(auth, loginForm.value.email, loginForm.value.password)
-    // Add redirect logic here (e.g., router.push('/'))
+    await authStore.login(loginForm.value.email, loginForm.value.password);
+    if (authStore.isAuthenticated) {
+      navigateTo("/");
+    }
   } catch (err: any) {
-    error.value = getFirebaseError(err.code)
+    error.value = getFirebaseError(err.code);
   } finally {
-    loading.value = false
+    loading.value = false;
   }
-  */
   console.log("Login attempt with:", loginForm.value);
 };
 
@@ -378,39 +377,36 @@ const handleRegister = async () => {
   }
 
   // Uncomment and implement with Firebase if needed
-  /*
-  loading.value = true
-  error.value = null
+  loading.value = true;
+  error.value = null;
   try {
-    const auth = getAuth()
-    await createUserWithEmailAndPassword(auth, registerForm.value.email, registerForm.value.password)
-    // Add redirect logic here (e.g., router.push('/'))
+    await authStore.register(loginForm.value.email, loginForm.value.password);
+    if (authStore.isAuthenticated) {
+      navigateTo("/");
+    }
   } catch (err: any) {
-    error.value = getFirebaseError(err.code)
+    error.value = getFirebaseError(err.code);
   } finally {
-    loading.value = false
+    loading.value = false;
   }
-  */
   console.log("Register attempt with:", registerForm.value);
 };
 
 // Handle Google sign-in
 const signInWithGoogle = async () => {
   // Uncomment and implement with Firebase if needed
-  /*
-  loading.value = true
-  error.value = null
+  loading.value = true;
+  error.value = null;
   try {
-    const auth = getAuth()
-    const provider = new GoogleAuthProvider()
-    await signInWithPopup(auth, provider)
-    // Add redirect logic here (e.g., router.push('/'))
+    await authStore.loginWithGoogle();
+    if (authStore.isAuthenticated) {
+      navigateTo("/");
+    }
   } catch (err: any) {
-    error.value = getFirebaseError(err.code)
+    error.value = getFirebaseError(err.code);
   } finally {
-    loading.value = false
+    loading.value = false;
   }
-  */
   console.log("Google sign-in attempt");
 };
 

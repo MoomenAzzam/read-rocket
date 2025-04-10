@@ -13,24 +13,39 @@
             <path d="M12 2L1 12h3v9h6v-6h4v6h6v-9h3L12 2z" />
           </svg>
           <span class="ml-2 text-xl font-bold text-gray-800">ReadRocket</span>
-        </div></NuxtLink
-      >
+        </div>
+      </NuxtLink>
 
       <!-- Auth State -->
-      <AuthState :user="user" @login="handleLogin" />
+      <AuthState
+        :user="authStore.user"
+        :loading="authStore.loading"
+        @login="handleLogin"
+        @logout="handleLogout"
+      />
     </div>
   </header>
 </template>
 
 <script setup lang="ts">
-import type { User } from "firebase/auth";
-const user = ref<User | null>(null); // Replace with real auth state
+import { useAuthStore } from "~/stores/auth";
+
+const authStore = useAuthStore();
+
+// Initialize auth state when component mounts
+onMounted(async () => {
+  await authStore.initAuth();
+});
 
 const handleLogin = () => {
-  // Implement login logic
-  console.log("Redirect to login");
   navigateTo("/auth");
+};
+
+const handleLogout = async () => {
+  await authStore.logout();
+  navigateTo("/");
 };
 </script>
 
-<style></style>
+<style scoped>
+</style>

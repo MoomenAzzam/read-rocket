@@ -3,8 +3,21 @@ export default defineNuxtConfig({
   compatibilityDate: "2024-11-01",
   devtools: { enabled: true },
   css: ["~/assets/css/main.css"],
+
   vite: {
     plugins: [tailwindcss()],
+  },
+  modules: ["@pinia/nuxt"],
+  runtimeConfig: {
+    public: {
+      firebaseApiKey: process.env.FIREBASE_API_KEY,
+      authDomain: process.env.FB_AUTH_DOMAIN,
+      projectId: process.env.FB_PROJECT_ID,
+      storageBucket: process.env.FB_STORAGE_BUCKET,
+      messagingSenderId: process.env.FB_MESSAGING_SENDER_ID,
+      appId: process.env.FB_APP_ID,
+      measurementId: process.env.FB_MEASUREMENT_ID,
+    },
   },
   app: {
     head: {
@@ -48,4 +61,6 @@ export default defineNuxtConfig({
       link: [],
     },
   },
+
+  modules: ["@pinia/nuxt"],
 });

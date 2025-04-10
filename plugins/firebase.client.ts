@@ -1,29 +1,38 @@
+// plugins/firebase.client.ts
+import { defineNuxtPlugin } from "#app";
 import { initializeApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
-import { getAnalytics } from "firebase/analytics";
+import {
+  getAuth,
+  GoogleAuthProvider,
+  setPersistence,
+  browserLocalPersistence,
+} from "firebase/auth";
 
 export default defineNuxtPlugin((nuxtApp) => {
+  // Access runtime config within the plugin
   const config = useRuntimeConfig();
+  console.log("Runtime Config:", config.public);
+
   const firebaseConfig = {
-    apiKey: "AIzaSyCC6xq_lS1pSq0oXYOrok8wiGpb6aR7HHk",
-    authDomain: "vue3-85ba6.firebaseapp.com",
-    projectId: "vue3-85ba6",
-    storageBucket: "vue3-85ba6.firebasestorage.app",
-    messagingSenderId: "949769607410",
-    appId: "1:949769607410:web:c4be64b58f887f3bbdd86b",
-    measurementId: "G-H2MW3VJ4DS",
+    apiKey:
+      config.public.firebaseApiKey || "AIzaSyCC6xq_lS1pSq0oXYOrok8wiGpb6aR7HHk", // Fallback for testing
+    authDomain: config.public.authDomain,
+    projectId: config.public.projectId,
+    storageBucket: config.public.storageBucket,
+    messagingSenderId: config.public.messagingSenderId,
+    appId: config.public.appId,
+    measurementId: config.public.measurementId,
   };
 
+  // Initialize Firebase
   const app = initializeApp(firebaseConfig);
-
-  const analytics = getAnalytics(app);
   const auth = getAuth(app);
-  const firestore = getFirestore(app);
+  const googleProvider = new GoogleAuthProvider();
 
-  nuxtApp.vueApp.provide("auth", auth);
+  // Set persistence
+  setPersistence(auth, browserLocalPersistence);
+
+  // Provide Firebase instances to the app
   nuxtApp.provide("auth", auth);
-
-  nuxtApp.vueApp.provide("firestore", firestore);
-  nuxtApp.provide("firestore", firestore);
+  nuxtApp.provide("googleProvider", googleProvider);
 });

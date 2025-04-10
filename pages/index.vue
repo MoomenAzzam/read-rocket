@@ -118,4 +118,8 @@ const startTest = () => {
     );
   }
 };
+
+const authStore = useAuthStore();
+// Wait for auth state to be ready
+await authStore.initAuth();
 </script>
