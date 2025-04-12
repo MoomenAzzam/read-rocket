@@ -32,6 +32,9 @@ const onClickOutside = () => {
           @click="showMenu = !showMenu"
           class="flex items-center space-x-2 focus:outline-none"
         >
+          <span class="text-gray-700 font-medium">
+            {{ user.displayName || "My Account" }}
+          </span>
           <div
             class="w-10 h-10 rounded-full bg-sky-100 flex items-center justify-center border border-sky-200"
           >
@@ -43,9 +46,6 @@ const onClickOutside = () => {
               }}
             </span>
           </div>
-          <span class="text-gray-700 font-medium">
-            {{ user.displayName || "My Account" }}
-          </span>
           <svg
             class="w-4 h-4 text-gray-500 transition-transform duration-200"
             :class="{ 'rotate-180': showMenu }"

@@ -1,9 +1,8 @@
 <script setup lang="ts">
 import { ref, computed } from "vue";
-import type { User } from "firebase/auth";
-
+const authStore = useAuthStore();
 // Mock user - replace with real auth
-const user = ref<User | null>(null);
+const user = computed(() => authStore.user);
 
 // Questions data
 const questions = ref([
@@ -33,7 +32,6 @@ const questions = ref([
 // Test results
 const route = useRoute();
 const wpm = ref(Number(route.query.wpm) || 0);
-console.log("wpm", wpm.value);
 
 // const wpm = ref(250) // Would come from route params in real app
 const submitted = ref(false);
@@ -73,12 +71,8 @@ const submitAnswers = () => {
 
 // Save results (would connect to Firebase in real app)
 const saveResults = () => {
-  console.log("Saving results:", {
-    wpm: wpm.value,
-    comprehension: comprehensionPercentage.value,
-    date: new Date(),
-  });
-  // navigateTo('/')
+
+  navigateTo("/");
 };
 </script>
 

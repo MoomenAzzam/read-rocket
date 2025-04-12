@@ -68,19 +68,19 @@ import { ref } from "vue";
 // Mock data - replace with real data fetching
 const topics = ref([
   {
-    id: 1,
+    id: "technology",
     name: "Technology",
     emoji: "💻",
     description: "Articles on AI, programming, and gadgets",
   },
   {
-    id: 2,
+    id: "science",
     name: "Science",
     emoji: "🔬",
     description: "Discoveries, space, and physics",
   },
   {
-    id: 3,
+    id: "business",
     name: "Business",
     emoji: "📈",
     description: "Finance, startups, and markets",
@@ -88,7 +88,7 @@ const topics = ref([
 ]);
 
 const languages = ref([
-  { code: "en", name: "English", flag: "🇬🇧" },
+  { code: "en", name: "English", flag: "🇺🇸" },
   { code: "es", name: "Spanish", flag: "🇪🇸" },
   { code: "fr", name: "French", flag: "🇫🇷" },
   { code: "de", name: "German", flag: "🇩🇪" },
@@ -96,30 +96,20 @@ const languages = ref([
 ]);
 
 // State
-const selectedTopic = ref<number | null>(null);
+const selectedTopic = ref<string | null>(null);
 const selectedLanguage = ref<string | null>(null);
 
 // Methods
 const handleLogin = () => {
-  // Implement login logic
-  console.log("Redirect to login");
   navigateTo("/auth");
 };
 
 const startTest = () => {
   if (selectedTopic.value && selectedLanguage.value) {
-    console.log("Starting test with:", {
-      topic: selectedTopic.value,
-      language: selectedLanguage.value,
-    });
-    // Navigate to test page
     navigateTo(
       `/test?topic=${selectedTopic.value}&lang=${selectedLanguage.value}`
     );
   }
 };
 
-const authStore = useAuthStore();
-// Wait for auth state to be ready
-await authStore.initAuth();
 </script>

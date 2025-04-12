@@ -1,13 +1,5 @@
-<template>
-  profile
-</template>
+<template>profile</template>
 
-<script>
-export default {
+<script></script>
 
-}
-</script>
-
-<style>
-
-</style>
+<style></style>

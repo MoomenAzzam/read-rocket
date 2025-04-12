@@ -79,13 +79,27 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from "vue";
 
+const articles = useArticlesStore();
+
+const route = useRoute();
+const topic = route.query.topic;
+const lang = route.query.lang;
+
 // Mock paragraph data (in a real app, you'd fetch this based on topic/language)
-const testParagraph =
-  ref(`The ability to read quickly while maintaining comprehension is a valuable skill in today's information-rich world. Speed reading techniques can help you process written material more efficiently, whether you're studying for exams, keeping up with industry news, or simply enjoying a good book. 
-The fundamental principle of speed reading is minimizing subvocalization - the tendency to "hear" words in your mind as you read. While this comes naturally to most readers, it limits your reading speed to about the same pace as speaking. By training your eyes to recognize words and phrases without internally vocalizing them, you can significantly increase your reading rate.
-Another key technique is expanding your peripheral vision to capture more words at once. Most untrained readers focus on individual words, moving their eyes from word to word. Skilled speed readers take in entire phrases or even full lines with each fixation. This reduces the number of eye movements needed and increases reading speed.
-Practice is essential for developing speed reading skills. Start by timing your current reading speed to establish a baseline. Then experiment with different techniques, using a pointer or your finger to guide your eyes. Many people find that moving a pointer slightly faster than their comfortable reading pace helps train their eyes to move more quickly.
-`);
+const testParagraph = ref(``);
+
+onMounted(() => {
+  // const content = data.topics[topic].articles[0].translations.filter(
+  //   (obj) => obj.lang == lang
+  // );
+  // testParagraph.value = content[0].content;
+});
+
+onMounted(async () => {
+  const results = await articles.fetchRandomArticleByTopic(topic, lang);
+  console.log("results", results);
+  testParagraph.value = results.content;
+});
 
 // Test state
 const testStarted = ref(false);
@@ -107,8 +121,6 @@ const startTest = () => {
 
 // Finish the test
 const finishTest = () => {
-  console.log(currentTime);
-
   if (timerInterval.value) {
     clearInterval(timerInterval.value);
   }
@@ -117,11 +129,6 @@ const finishTest = () => {
   const wordCount = testParagraph.value.split(/\s+/).length;
   const minutes = currentTime.value / 60;
   wpm.value = Math.round(wordCount / minutes);
-
-  // In a real app, you'd save these results and navigate to results page
-  console.log(
-    `Test completed in ${currentTime.value} seconds with ${wpm.value} WPM`
-  );
 
   // Navigate to results page
   // navigateTo(`/results?time=${currentTime.value}&wpm=${wpm}`)

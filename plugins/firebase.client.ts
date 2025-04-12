@@ -7,15 +7,16 @@ import {
   setPersistence,
   browserLocalPersistence,
 } from "firebase/auth";
+import { getFirestore } from "firebase/firestore";
 
 export default defineNuxtPlugin((nuxtApp) => {
-  // Access runtime config within the plugin
+  // Access runtime config
   const config = useRuntimeConfig();
-  console.log("Runtime Config:", config.public);
 
+  // Firebase configuration
   const firebaseConfig = {
     apiKey:
-      config.public.firebaseApiKey || "AIzaSyCC6xq_lS1pSq0oXYOrok8wiGpb6aR7HHk", // Fallback for testing
+      config.public.firebaseApiKey || "AIzaSyCC6xq_lS1pSq0oXYOrok8wiGpb6aR7HHk",
     authDomain: config.public.authDomain,
     projectId: config.public.projectId,
     storageBucket: config.public.storageBucket,
@@ -26,13 +27,17 @@ export default defineNuxtPlugin((nuxtApp) => {
 
   // Initialize Firebase
   const app = initializeApp(firebaseConfig);
+
+  // Initialize Auth
   const auth = getAuth(app);
   const googleProvider = new GoogleAuthProvider();
-
-  // Set persistence
   setPersistence(auth, browserLocalPersistence);
 
-  // Provide Firebase instances to the app
+  // Initialize Firestore
+  const db = getFirestore(app);
+
+  // Provide services to the app
   nuxtApp.provide("auth", auth);
   nuxtApp.provide("googleProvider", googleProvider);
+  nuxtApp.provide("db", db);
 });

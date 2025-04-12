@@ -7,13 +7,13 @@ import {
   onAuthStateChanged,
 } from "firebase/auth";
 import type { User } from "firebase/auth"; // Explicit type import
-import firebaseClient from "~/plugins/firebase.client"; // Default import
 
 export const useAuthStore = defineStore("auth", {
   state: () => ({
     user: null as User | null,
     loading: false,
     error: null as string | null,
+    isAdmin: false,
   }),
 
   actions: {
@@ -39,6 +39,8 @@ export const useAuthStore = defineStore("auth", {
     // Email/Password Login
     async login(email: string, password: string) {
       const { $auth } = useNuxtApp();
+      const config = useRuntimeConfig();
+
       if (!$auth) throw new Error("Auth not initialized");
       try {
         this.loading = true;
@@ -48,6 +50,9 @@ export const useAuthStore = defineStore("auth", {
           password
         );
         this.user = userCredential.user;
+        if (config.public.adminId == this.user.uid) {
+          this.isAdmin == true;
+        }
       } catch (error: any) {
         this.error = error.message;
       } finally {
@@ -57,12 +62,17 @@ export const useAuthStore = defineStore("auth", {
 
     // Google Login
     async loginWithGoogle() {
+      const config = useRuntimeConfig();
+
       const { $auth, $googleProvider } = useNuxtApp();
       if (!$auth) throw new Error("Auth not initialized");
       try {
         this.loading = true;
         const userCredential = await signInWithPopup($auth, $googleProvider);
         this.user = userCredential.user;
+        if (config.public.adminId == this.user.uid) {
+          this.isAdmin == true;
+        }
       } catch (error: any) {
         this.error = error.message;
       } finally {
@@ -78,6 +88,7 @@ export const useAuthStore = defineStore("auth", {
         this.loading = true;
         await signOut($auth);
         this.user = null;
+        this.isAdmin == false;
       } catch (error: any) {
         this.error = error.message;
       } finally {

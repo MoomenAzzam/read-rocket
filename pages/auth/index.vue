@@ -298,14 +298,7 @@
   </div>
 </template>
 <script setup lang="ts">
-// Uncomment these if you're using Firebase
-// import {
-//   getAuth,
-//   signInWithEmailAndPassword,
-//   createUserWithEmailAndPassword,
-//   GoogleAuthProvider,
-//   signInWithPopup,
-// } from 'firebase/auth'
+
 definePageMeta({
   layout: "blank",
 });
@@ -353,10 +346,8 @@ const handleLogin = async () => {
   } finally {
     loading.value = false;
   }
-  console.log("Login attempt with:", loginForm.value);
 };
 
-// Handle registration submission
 const handleRegister = async () => {
   // Basic validation
   if (
@@ -376,20 +367,23 @@ const handleRegister = async () => {
     return;
   }
 
-  // Uncomment and implement with Firebase if needed
   loading.value = true;
   error.value = null;
   try {
-    await authStore.register(loginForm.value.email, loginForm.value.password);
+    await authStore.register(
+      registerForm.value.email,
+      registerForm.value.password
+    );
+
     if (authStore.isAuthenticated) {
       navigateTo("/");
     }
   } catch (err: any) {
     error.value = getFirebaseError(err.code);
+    console.error("Registration error:", err);
   } finally {
     loading.value = false;
   }
-  console.log("Register attempt with:", registerForm.value);
 };
 
 // Handle Google sign-in
@@ -407,7 +401,6 @@ const signInWithGoogle = async () => {
   } finally {
     loading.value = false;
   }
-  console.log("Google sign-in attempt");
 };
 
 // Convert Firebase error codes to user-friendly messages
@@ -434,4 +427,3 @@ const getFirebaseError = (code: string): string => {
   }
 };
 </script>
-Key Changes a
