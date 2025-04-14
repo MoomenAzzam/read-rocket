@@ -69,28 +69,28 @@ export const useAuthStore = defineStore("auth", {
     // Email/Password Registration
     async register(email: string, password: string) {
       const { $auth, $db } = useNuxtApp();
-      if (!this.isAnonymous) {
-        try {
-          this.loading = true;
-          this.error = null;
+      // if (!this.isAnonymous) {
+      try {
+        this.loading = true;
+        this.error = null;
 
-          const userCredential = await createUserWithEmailAndPassword(
-            $auth as Auth,
-            email,
-            password
-          );
+        const userCredential = await createUserWithEmailAndPassword(
+          $auth as Auth,
+          email,
+          password
+        );
 
-          await this.createUserDocument(userCredential.user);
-          return userCredential;
-        } catch (error) {
-          this.handleAuthError(error as FirebaseError);
-          throw error;
-        } finally {
-          this.loading = false;
-        }
-      } else {
-        return this.upgradeToEmailPassword(email, password);
+        await this.createUserDocument(userCredential.user);
+        return userCredential;
+      } catch (error) {
+        this.handleAuthError(error as FirebaseError);
+        throw error;
+      } finally {
+        this.loading = false;
       }
+      // } else {
+      //   return this.upgradeToEmailPassword(email, password);
+      // }
     },
 
     // Email/Password Login
@@ -118,27 +118,31 @@ export const useAuthStore = defineStore("auth", {
     // Google Login
     async loginWithGoogle() {
       const { $auth, $googleProvider } = useNuxtApp();
-      if (!this.isAnonymous) {
-        try {
-          this.loading = true;
-          this.error = null;
+      console.log("Login with Google", this.isAnonymous);
 
-          const userCredential = await signInWithPopup(
-            $auth as Auth,
-            $googleProvider
-          );
+      // if (!this.isAnonymous) {
+      try {
+        this.loading = true;
+        this.error = null;
 
-          await this.createUserDocument(userCredential.user);
-          return userCredential;
-        } catch (error) {
-          this.handleAuthError(error as FirebaseError);
-          throw error;
-        } finally {
-          this.loading = false;
-        }
-      } else {
-        return this.upgradeWithGoogle();
+        const userCredential = await signInWithPopup(
+          $auth as Auth,
+          $googleProvider
+        );
+
+        await this.createUserDocument(userCredential.user);
+        return userCredential;
+      } catch (error) {
+        this.handleAuthError(error as FirebaseError);
+        throw error;
+      } finally {
+        this.loading = false;
       }
+      // } else {
+      //   console.log("Upgrade anonymous to Google account");
+
+      //   return this.upgradeWithGoogle();
+      // }
     },
 
     // Anonymous Sign In

@@ -9,9 +9,16 @@ import {
   getDocs,
   where,
   query,
+  addDoc,
   type DocumentData,
 } from "firebase/firestore";
-import type { Article, Topic, Translation } from "../types";
+import type {
+  Article,
+  Topic,
+  Translation,
+  TestResult,
+  QuestionAnswer,
+} from "../types";
 
 export const useArticlesStore = defineStore("articles", {
   state: () => ({
@@ -19,6 +26,7 @@ export const useArticlesStore = defineStore("articles", {
     currentArticle: null as Article | null,
     loading: false,
     error: null as string | null,
+    recentResults: [] as TestResult[],
   }),
 
   actions: {
@@ -187,6 +195,50 @@ export const useArticlesStore = defineStore("articles", {
         this.loading = false;
       }
     },
+    async saveTestResults(params: {
+      userId: string;
+      topic: string;
+      language: string;
+      wpm: number;
+      comprehension: number;
+      answers: QuestionAnswer[];
+    }) {
+      const { $db } = useNuxtApp();
+      if (!$db) throw new Error("Firestore not initialized");
+
+      try {
+        this.loading = true;
+        this.error = null;
+
+        // Create a reference to the user's document
+        const userRef = doc($db, "users", params.userId);
+
+        // Create a reference to the user's testResults subcollection
+        const testResultsRef = collection(userRef, "testResults");
+
+        // Add the new test result (timestamp is added here)
+        const docRef = await addDoc(testResultsRef, {
+          topic: params.topic,
+          language: params.language,
+          wpm: params.wpm,
+          comprehension: params.comprehension,
+          answers: params.answers,
+        });
+
+        this.recentResults.unshift({
+          id: docRef.id,
+          ...params,
+          timestamp: new Date(),
+        });
+
+        return docRef.id;
+      } catch (error: any) {
+        this.error = error.message;
+        throw error;
+      } finally {
+        this.loading = false;
+      }
+    },
   },
 
   getters: {
@@ -201,7 +253,7 @@ export const useArticlesStore = defineStore("articles", {
 
     // Get articles by topic
     getArticlesByTopic: (state) => (topicName: string) => {
-      const topic = state.topics.find((topic) => topic.name === topicName);
+      const topic = state.topics.find((topic) => topic?.name === topicName);
       return topic?.articles || [];
     },
   },

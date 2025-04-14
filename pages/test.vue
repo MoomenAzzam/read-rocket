@@ -4,8 +4,6 @@
       <!-- Header with timer -->
       <div class="flex justify-between items-center mb-8">
         <h1 class="text-2xl font-bold text-gray-800">Reading Test</h1>
-        {{ currentTime }}
-        {{ wpm }}
         <div
           v-if="currentStage === 'reading'"
           class="text-xl font-mono bg-white px-4 py-2 rounded-lg shadow-sm"
@@ -143,27 +141,38 @@ const comprehensionPercentage = computed(() => {
   return Math.round((correctCount / questions.value.length) * 100);
 });
 
-// Save results to database
 const saveResults = async () => {
   if (!authStore.user) {
     router.push("/auth");
-    return;
+    // return;
   }
-
-  // Save to Firestore
-  await articles.saveTestResults({
-    userId: authStore.user.uid,
+  console.log("Saving test results:", {
+    userId: authStore?.user?.uid,
     topic: route.query.topic,
     language: route.query.lang,
     wpm: wpm.value,
     comprehension: comprehensionPercentage.value,
     answers: questions.value.map((q) => ({
-      questionId: q.id,
       userAnswer: q.userAnswer,
       correct: q.correct,
     })),
-    timestamp: new Date(),
   });
+
+  // Ensure required fields have values
+  const testResults = {
+    userId: authStore.user.uid,
+    topic: route.query.topic || "unknown", // provide default if undefined
+    language: route.query.lang || "unknown", // provide default if undefined
+    wpm: wpm.value,
+    comprehension: comprehensionPercentage.value,
+    answers: questions.value.map((q) => ({
+      userAnswer: q.userAnswer,
+      correct: q.correct,
+    })),
+  };
+
+  // Save to Firestore
+  await articles.saveTestResults(testResults);
 
   router.push("/");
 };

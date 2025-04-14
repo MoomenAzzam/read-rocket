@@ -5,8 +5,6 @@
     <div class="w-full max-w-md">
       <div class="bg-white rounded-xl shadow-2xl p-8">
         <!-- Tabs -->
-        {{ authStore.isAnonymous }}
-
         <div class="flex mb-8 border-b border-gray-200">
           <button
             @click="activeTab = 'login'"

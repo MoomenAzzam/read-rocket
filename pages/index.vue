@@ -21,7 +21,7 @@
           :key="topic.id"
           :id="topic.id"
           :emoji="topic.emoji"
-          :title="topic.name"
+          :title="topic?.name"
           :description="topic.description"
           :selected="selectedTopic === topic.id"
           @select="selectedTopic = $event"
@@ -38,7 +38,7 @@
           :key="lang.code"
           :code="lang.code"
           :flag="lang.flag"
-          :name="lang.name"
+          :name="lang?.name"
           :selected="selectedLanguage === lang.code"
           @select="selectedLanguage = $event"
         />
