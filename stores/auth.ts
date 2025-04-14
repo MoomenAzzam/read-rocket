@@ -99,6 +99,8 @@ export const useAuthStore = defineStore("auth", {
     // Initialize auth state listener
     async initAuth() {
       const { $auth } = useNuxtApp(); // Add this line to get $auth
+      const config = useRuntimeConfig();
+
       if (!$auth) {
         this.error = "Auth not initialized";
         return Promise.resolve(null); // Handle the case where auth isn’t ready

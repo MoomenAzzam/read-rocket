@@ -88,17 +88,11 @@ const lang = route.query.lang;
 // Mock paragraph data (in a real app, you'd fetch this based on topic/language)
 const testParagraph = ref(``);
 
-onMounted(() => {
-  // const content = data.topics[topic].articles[0].translations.filter(
-  //   (obj) => obj.lang == lang
-  // );
-  // testParagraph.value = content[0].content;
-});
 
 onMounted(async () => {
   const results = await articles.fetchRandomArticleByTopic(topic, lang);
   console.log("results", results);
-  testParagraph.value = results.content;
+  testParagraph.value = results?.content;
 });
 
 // Test state

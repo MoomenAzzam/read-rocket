@@ -8,6 +8,11 @@
             Admin Dashboard
           </NuxtLink>
         </div>
+        <div class="flex items-center">
+          <NuxtLink to="/" class="text-xl font-bold">
+            Publick website
+          </NuxtLink>
+        </div>
         <div class="flex items-center space-x-4">
           <button @click="logout" class="px-3 py-2 rounded hover:bg-sky-700">
             Logout
@@ -20,8 +25,8 @@
 
 <script setup>
 const logout = async () => {
-  const auth = useFirebaseAuth();
-  await auth.signOut();
-  navigateTo("/login");
+  const auth = useAuthStore();
+  await auth.logout();
+  navigateTo("/auth");
 };
 </script>
