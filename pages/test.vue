@@ -4,107 +4,100 @@
       <!-- Header with timer -->
       <div class="flex justify-between items-center mb-8">
         <h1 class="text-2xl font-bold text-gray-800">Reading Test</h1>
-        <div class="text-xl font-mono bg-white px-4 py-2 rounded-lg shadow-sm">
+        {{ currentTime }}
+        {{ wpm }}
+        <div
+          v-if="currentStage === 'reading'"
+          class="text-xl font-mono bg-white px-4 py-2 rounded-lg shadow-sm"
+        >
           {{ formattedTime }}
         </div>
       </div>
 
-      <!-- Test content -->
-      <div
-        v-if="!testStarted"
-        class="bg-white p-8 rounded-xl shadow-md text-center"
-      >
-        <h2 class="text-xl font-semibold mb-4">
-          Ready to begin your speed reading test?
-        </h2>
-        <p class="text-gray-600 mb-6">
-          Read the following passage as quickly as you can while maintaining
-          comprehension.
-        </p>
-        <button
-          @click="startTest"
-          class="px-6 py-3 bg-sky-500 text-white rounded-lg hover:bg-sky-600 transition-colors text-lg"
-        >
-          Begin Test
-        </button>
-      </div>
-      <!-- Reading content -->
-      <div v-else-if="!testFinished" class="bg-white p-8 rounded-xl shadow-md">
-        <div class="prose max-w-none mb-8">
-          <p class="whitespace-pre-line text-xl">{{ testParagraph }}</p>
-        </div>
+      <!-- Dynamic components based on test state -->
+      <TestIntro v-if="currentStage === 'intro'" @start-test="startTest" />
 
-        <div class="text-center">
-          <button
-            @click="finishTest"
-            class="px-6 py-3 bg-sky-500 text-white rounded-lg hover:bg-sky-600 transition-colors text-lg"
-          >
-            Finish Test
-          </button>
-        </div>
-      </div>
+      <TestContent
+        v-else-if="currentStage === 'reading'"
+        :paragraph="testParagraph"
+        @finish-reading="finishReading"
+      />
+      <TestResults
+        v-else-if="currentStage === 'reading-results'"
+        :time="currentTime"
+        :wpm="wpm"
+        @retry="resetTest"
+        @continue="startQuiz"
+      />
 
-      <!-- Results placeholder (in real app this would be a separate page) -->
-      <div v-else class="bg-white p-8 rounded-xl shadow-md text-center">
-        <h2 class="text-xl font-semibold mb-4">Test Completed!</h2>
-        <p class="text-gray-600 mb-6">
-          You read the passage in {{ formattedTime }}.
-        </p>
-        <p class="text-gray-600 mb-6">
-          Calculating your words per minute is: {{ wpm }}
-        </p>
-        <div class="flex justify-center items-center gap-4">
-          <button
-            @click="
-              testFinished = false;
-              testStarted = false;
-              currentTime = 0;
-            "
-            class="px-6 py-3 bg-sky-500 text-white rounded-lg hover:bg-sky-600 transition-colors text-lg"
-          >
-            Try Again
-          </button>
-          <button
-            @click="goToQuestionsPage"
-            class="px-6 py-3 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors text-lg"
-          >
-            Go To Quiz
-          </button>
-        </div>
-      </div>
+      <QuizQuestions
+        v-else-if="currentStage === 'quiz'"
+        :questions="questions"
+        @submit-answers="submitAnswers"
+      />
+
+      <QuizResults
+        v-else-if="currentStage === 'quiz-results'"
+        :wpm="wpm"
+        :comprehension="comprehensionPercentage"
+        :questions="questions"
+        @save-results="saveResults"
+        @retry="resetTest"
+      />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from "vue";
+import { useRoute, useRouter } from "vue-router";
+import { useArticlesStore } from "@/stores/articles";
+import { useAuthStore } from "@/stores/auth";
+
+// Components
+import TestIntro from "@/components/ReadingTestPage/TestIntro.vue";
+import TestContent from "@/components/ReadingTestPage/TestContent.vue";
+import TestResults from "@/components/ReadingTestPage/TestResults.vue";
+import QuizQuestions from "@/components/ReadingTestPage/QuizQuestions.vue";
+import QuizResults from "@/components/ReadingTestPage/QuizResults.vue";
 
 const articles = useArticlesStore();
-
+const authStore = useAuthStore();
 const route = useRoute();
-const topic = route.query.topic;
-const lang = route.query.lang;
+const router = useRouter();
 
-// Mock paragraph data (in a real app, you'd fetch this based on topic/language)
-const testParagraph = ref(``);
+// Test data
+const testParagraph = ref("");
+const questions = ref([]);
+const currentStage = ref("intro"); // intro, reading, reading-results, quiz, quiz-results
 
-
-onMounted(async () => {
-  const results = await articles.fetchRandomArticleByTopic(topic, lang);
-  console.log("results", results);
-  testParagraph.value = results?.content;
-});
-
-// Test state
-const testStarted = ref(false);
-const testFinished = ref(false);
+// Timer related
 const startTime = ref<Date | null>(null);
 const currentTime = ref(0);
 const timerInterval = ref<NodeJS.Timeout | null>(null);
 const wpm = ref(0);
-// Start the test
+
+// Fetch article based on topic and language
+onMounted(async () => {
+  const results = await articles.fetchRandomArticleByTopic(
+    route.query.topic,
+    route.query.lang
+  );
+  testParagraph.value = results?.content;
+  questions.value = results?.questions || [];
+});
+
+onMounted(async () => {
+  console.log("Checking authentication status...", authStore.isAuthenticated);
+
+  if (!authStore.isAuthenticated) {
+    await authStore.signInAnonymously();
+  }
+});
+
+// Start the reading test
 const startTest = () => {
-  testStarted.value = true;
+  currentStage.value = "reading";
   startTime.value = new Date();
   timerInterval.value = setInterval(() => {
     currentTime.value = Math.floor(
@@ -113,23 +106,77 @@ const startTest = () => {
   }, 100);
 };
 
-// Finish the test
-const finishTest = () => {
+// Finish reading and show results
+const finishReading = () => {
   if (timerInterval.value) {
     clearInterval(timerInterval.value);
   }
-  testFinished.value = true;
-  // Calculate WPM (words per minute)
+
+  // Calculate WPM
   const wordCount = testParagraph.value.split(/\s+/).length;
   const minutes = currentTime.value / 60;
   wpm.value = Math.round(wordCount / minutes);
 
-  // Navigate to results page
-  // navigateTo(`/results?time=${currentTime.value}&wpm=${wpm}`)
+  currentStage.value = "reading-results";
 };
 
-const goToQuestionsPage = () => {
-  navigateTo(`/quiz?time=${currentTime.value}&wpm=${wpm.value}`);
+// Start the quiz
+const startQuiz = () => {
+  currentStage.value = "quiz";
+};
+
+// Submit quiz answers
+const submitAnswers = (userAnswers) => {
+  // Mark which answers are correct
+  questions.value.forEach((q, index) => {
+    q.userAnswer = userAnswers[index];
+    q.correct = q.userAnswer === q.answer;
+  });
+
+  currentStage.value = "quiz-results";
+};
+
+// Calculate comprehension percentage
+const comprehensionPercentage = computed(() => {
+  if (currentStage.value !== "quiz-results") return 0;
+  const correctCount = questions.value.filter((q) => q.correct).length;
+  return Math.round((correctCount / questions.value.length) * 100);
+});
+
+// Save results to database
+const saveResults = async () => {
+  if (!authStore.user) {
+    router.push("/auth");
+    return;
+  }
+
+  // Save to Firestore
+  await articles.saveTestResults({
+    userId: authStore.user.uid,
+    topic: route.query.topic,
+    language: route.query.lang,
+    wpm: wpm.value,
+    comprehension: comprehensionPercentage.value,
+    answers: questions.value.map((q) => ({
+      questionId: q.id,
+      userAnswer: q.userAnswer,
+      correct: q.correct,
+    })),
+    timestamp: new Date(),
+  });
+
+  router.push("/");
+};
+
+// Reset the test
+const resetTest = () => {
+  currentStage.value = "intro";
+  currentTime.value = 0;
+  startTime.value = null;
+  if (timerInterval.value) {
+    clearInterval(timerInterval.value);
+    timerInterval.value = null;
+  }
 };
 
 // Format time for display
@@ -141,7 +188,7 @@ const formattedTime = computed(() => {
     .padStart(2, "0")}`;
 });
 
-// Clean up timer on unmount
+// Clean up
 onUnmounted(() => {
   if (timerInterval.value) {
     clearInterval(timerInterval.value);

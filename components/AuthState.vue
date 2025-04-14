@@ -26,7 +26,7 @@ const onClickOutside = () => {
     </div>
 
     <!-- Logged In State -->
-    <div v-else-if="user" class="flex items-center space-x-4">
+    <div v-else-if="user && !user.isAnonymous" class="flex items-center space-x-4">
       <div class="relative">
         <button
           @click="showMenu = !showMenu"

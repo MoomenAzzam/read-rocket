@@ -15,6 +15,15 @@
           <span class="ml-2 text-xl font-bold text-gray-800">ReadRocket</span>
         </div>
       </NuxtLink>
+      <div v-if="authStore.isAdmin">
+        <button>
+          <NuxtLink
+            to="/admin"
+            class="ml-2 bg-sky-500 hover:bg-sky-600 text-white px-4 py-2 rounded"
+            >Admin</NuxtLink
+          >
+        </button>
+      </div>
 
       <!-- Auth State -->
       <AuthState
@@ -34,7 +43,7 @@ const authStore = useAuthStore();
 
 // Initialize auth state when component mounts
 onMounted(async () => {
-  await authStore.initAuth();
+  // await authStore.initAuthListener();
 });
 
 const handleLogin = () => {
@@ -47,5 +56,4 @@ const handleLogout = async () => {
 };
 </script>
 
-<style scoped>
-</style>
+<style scoped></style>

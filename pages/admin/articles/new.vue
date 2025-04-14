@@ -10,7 +10,7 @@
 import { AdminArticleForm } from "#components";
 
 const onSuccess = () => {
-  navigateTo("/admin/articles");
+  navigateTo("/admin");
 };
 definePageMeta({
   layout: "admin",

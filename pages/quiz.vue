@@ -71,7 +71,6 @@ const submitAnswers = () => {
 
 // Save results (would connect to Firebase in real app)
 const saveResults = () => {
-
   navigateTo("/");
 };
 </script>
@@ -203,8 +202,8 @@ const saveResults = () => {
           <div class="mt-4 flex space-x-3">
             <button
               @click="
-                user = {};
                 showLoginPrompt = false;
+                navigateTo('/auth');
               "
               class="px-4 py-2 bg-sky-500 text-white rounded-lg hover:bg-sky-600 transition-colors"
             >

@@ -1,12 +1,10 @@
 <template>
+  <SplashScreen />
   <NuxtLayout>
     <NuxtPage />
-  </NuxtLayout>
+  </NuxtLayout> 
 </template>
 
 <script lang="ts" setup>
-const authStore = useAuthStore();
-onMounted(async () => {
-  await authStore.initAuth();
-});
+
 </script>
