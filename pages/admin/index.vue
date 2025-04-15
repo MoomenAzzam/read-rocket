@@ -95,7 +95,7 @@
               <!-- Actions -->
             </div>
           </div>
-          <!-- <div class="flex md:flex gap-2 m-4 justify-between">
+          <div class="flex md:flex gap-2 m-4 justify-between">
             <NuxtLink
               :to="`/admin/articles/edit/${topic.id}`"
               class="flex items-center gap-1.5 text-sm px-3 py-2 rounded-lg border border-gray-200 hover:border-sky-300 hover:bg-sky-50 text-gray-700 hover:text-sky-600 transition-colors"
@@ -118,7 +118,7 @@
               />
               <span class="hidden sm:inline">Delete</span>
             </button>
-          </div> -->
+          </div>
         </div>
       </div>
     </div>

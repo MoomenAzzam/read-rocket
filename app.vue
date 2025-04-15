@@ -1,6 +1,6 @@
 <template>
   <SplashScreen v-if="showSplash" />
-  <NuxtLayout v-else name="default">
+  <NuxtLayout v-else>
     <NuxtPage />
   </NuxtLayout>
 </template>
@@ -21,5 +21,4 @@ const initializeApp = async () => {
 onMounted(() => {
   setTimeout(initializeApp, SPLASH_DURATION);
 });
-
 </script>

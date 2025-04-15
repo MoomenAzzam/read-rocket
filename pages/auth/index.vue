@@ -299,6 +299,13 @@
 </template>
 <script setup lang="ts">
 definePageMeta({
+  title: "Authentication",
+  meta: [
+    {
+      name: "description",
+      content: "Sign in or sign up to access your account.",
+    },
+  ],
   layout: "blank",
 });
 
