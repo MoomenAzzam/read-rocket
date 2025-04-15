@@ -181,7 +181,6 @@ export const useArticlesStore = defineStore("articles", {
         // Select a random article
         const randomIndex = Math.floor(Math.random() * articles.length);
         const randomArticle = articles[randomIndex];
-        console.log(randomArticle);
         // this.currentArticle.id = randomArticle.id;
         this.currentArticle = randomArticle.translations.filter((l) => {
           return l.lang == lang;

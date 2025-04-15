@@ -86,8 +86,6 @@ onMounted(async () => {
 });
 
 onMounted(async () => {
-  console.log("Checking authentication status...", authStore.isAuthenticated);
-
   if (!authStore.isAuthenticated) {
     await authStore.signInAnonymously();
   }

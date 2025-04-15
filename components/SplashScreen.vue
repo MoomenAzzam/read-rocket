@@ -5,13 +5,9 @@
     enter-from-class="opacity-0"
     leave-to-class="opacity-0"
   >
-    <div
-      v-if="show"
-      class="fixed inset-0 z-50 bg-white flex items-center justify-center"
-    >
+    <div class="fixed inset-0 z-50 bg-white flex items-center justify-center">
       <div
         class="splash-screen fixed inset-0 z-50 flex items-center justify-center bg-white dark:bg-gray-900 transition-opacity duration-500"
-        :class="{ 'opacity-0 pointer-events-none': !show }"
       >
         <div class="text-center">
           <div class="w-32 h-32 mx-auto mb-4">
@@ -30,15 +26,8 @@
   </Transition>
 </template>
 
-<script setup>
-const authStore = useAuthStore();
-
-const show = ref(true);
-
-onMounted(async () => {
-  setTimeout(async () => {
-    show.value = false;
-    await authStore.initAuthListener();
-  }, 2000);
-});
+<script lang="ts" setup>
+defineProps<{
+  show: boolean;
+}>();
 </script>
