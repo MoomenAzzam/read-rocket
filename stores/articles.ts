@@ -10,78 +10,78 @@ import {
   where,
   query,
   addDoc,
+  type DocumentData,
 } from "firebase/firestore";
-import type { Article, Topic, TestResult, QuestionAnswer } from "../types";
-
-interface ArticlesState {
-  topics: Topic[];
-  currentArticle: Article | null;
-  loading: boolean;
-  error: string | null;
-  recentResults: TestResult[];
-}
+import type {
+  Article,
+  Topic,
+  Translation,
+  TestResult,
+  QuestionAnswer,
+} from "../types";
 
 export const useArticlesStore = defineStore("articles", {
-  state: (): ArticlesState => ({
-    topics: [],
-    currentArticle: null,
+  state: () => ({
+    topics: [] as Topic[],
+    currentArticle: null as Article | null,
     loading: false,
-    error: null,
-    recentResults: [],
+    error: null as string | null,
+    recentResults: [] as TestResult[],
   }),
 
   actions: {
-    async withErrorHandling<T>(action: () => Promise<T>): Promise<T> {
+    // Fetch all topics and their articles
+    async fetchTopics() {
+      const { $db } = useNuxtApp();
+
+      if (!$db) throw new Error("Firestore not initialized");
       try {
         this.loading = true;
-        this.error = null;
-        return await action();
-      } catch (error: unknown) {
-        this.error =
-          error instanceof Error ? error.message : "An unknown error occurred";
+        const snapshot = await getDocs(collection($db, "articles"));
+
+        this.topics = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        })) as Topic[];
+      } catch (error: any) {
+        this.error = error.message;
         throw error;
       } finally {
         this.loading = false;
       }
     },
 
-    getFirestore() {
+    // Fetch single article by ID
+    async fetchArticle(id: string) {
       const { $db } = useNuxtApp();
       if (!$db) throw new Error("Firestore not initialized");
-      return $db;
-    },
-
-    async fetchTopics() {
-      return this.withErrorHandling(async () => {
-        const $db = this.getFirestore();
-        const snapshot = await getDocs(collection($db, "articles"));
-        this.topics = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        })) as Topic[];
-      });
-    },
-
-    async fetchArticle(id: string) {
-      return this.withErrorHandling(async () => {
-        const $db = this.getFirestore();
+      try {
+        this.loading = true;
         const docRef = doc($db, "articles", id);
         const docSnap = await getDoc(docRef);
 
-        if (!docSnap.exists()) {
+        if (docSnap.exists()) {
+          this.currentArticle = {
+            id: docSnap.id,
+            ...docSnap.data(),
+          } as Article;
+        } else {
           throw new Error("Article not found");
         }
-
-        this.currentArticle = {
-          id: docSnap.id,
-          ...docSnap.data(),
-        } as Article;
-      });
+      } catch (error: any) {
+        this.error = error.message;
+        throw error;
+      } finally {
+        this.loading = false;
+      }
     },
 
+    // Create new article
     async createArticle(articleData: Omit<Article, "id">) {
-      return this.withErrorHandling(async () => {
-        const $db = this.getFirestore();
+      const { $db } = useNuxtApp();
+      if (!$db) throw new Error("Firestore not initialized");
+      try {
+        this.loading = true;
         const articleRef = doc(collection($db, "articles"));
         await setDoc(articleRef, {
           ...articleData,
@@ -89,12 +89,20 @@ export const useArticlesStore = defineStore("articles", {
           createdAt: new Date().toISOString(),
         });
         return articleRef.id;
-      });
+      } catch (error: any) {
+        this.error = error.message;
+        throw error;
+      } finally {
+        this.loading = false;
+      }
     },
 
+    // Update existing article
     async updateArticle(id: string, articleData: Partial<Article>) {
-      return this.withErrorHandling(async () => {
-        const $db = this.getFirestore();
+      const { $db } = useNuxtApp();
+      if (!$db) throw new Error("Firestore not initialized");
+      try {
+        this.loading = true;
         const articleRef = doc($db, "articles", id);
         await setDoc(
           articleRef,
@@ -104,37 +112,64 @@ export const useArticlesStore = defineStore("articles", {
           },
           { merge: true }
         );
-      });
+      } catch (error: any) {
+        this.error = error.message;
+        throw error;
+      } finally {
+        this.loading = false;
+      }
     },
 
+    // Delete article
     async deleteArticle(id: string) {
-      return this.withErrorHandling(async () => {
-        const $db = this.getFirestore();
+      const { $db } = useNuxtApp();
+      if (!$db) throw new Error("Firestore not initialized");
+      try {
+        this.loading = true;
         await deleteDoc(doc($db, "articles", id));
-
+        // Remove from local state
         this.topics = this.topics.map((topic) => ({
           ...topic,
           articles:
             topic.articles?.filter((article) => article.id !== id) || [],
         }));
-      });
+      } catch (error: any) {
+        this.error = error.message;
+        throw error;
+      } finally {
+        this.loading = false;
+      }
     },
-
     async fetchRandomArticleByTopic(topic: string, lang: string) {
-      return this.withErrorHandling(async () => {
-        const $db = this.getFirestore();
+      const { $db } = useNuxtApp();
+      console.log(topic, lang);
+      if (!$db) throw new Error("Firestore not initialized");
+
+      try {
+        this.loading = true;
+
+        // Create a query that filters by topic
         const articlesRef = collection($db, "articles");
         const q = query(articlesRef, where("topic", "==", topic));
+
+        // Execute the query
         const querySnapshot = await getDocs(q);
 
         if (querySnapshot.empty) {
           throw new Error(`No articles found for topic: ${topic}`);
         }
 
+        // Convert docs to array and filter by available language
         const articles = querySnapshot.docs
-          .map((doc) => ({ id: doc.id, ...doc.data() } as Article))
+          .map(
+            (doc) =>
+              ({
+                id: doc.id,
+                ...doc.data(),
+              } as Article)
+          )
           .filter((article) =>
-            article.translations?.some((t) => t.lang === lang)
+            article.translations?.some((t: any) => t.lang === lang)
           );
 
         if (articles.length === 0) {
@@ -143,15 +178,22 @@ export const useArticlesStore = defineStore("articles", {
           );
         }
 
+        // Select a random article
         const randomIndex = Math.floor(Math.random() * articles.length);
         const randomArticle = articles[randomIndex];
-        this.currentArticle =
-          randomArticle.translations.find((l) => l.lang === lang) || null;
+        // this.currentArticle.id = randomArticle.id;
+        this.currentArticle = randomArticle.translations.filter((l) => {
+          return l.lang == lang;
+        })[0];
 
         return this.currentArticle;
-      });
+      } catch (error: any) {
+        this.error = error.message;
+        throw error;
+      } finally {
+        this.loading = false;
+      }
     },
-
     async saveTestResults(params: {
       userId: string;
       topic: string;
@@ -160,28 +202,46 @@ export const useArticlesStore = defineStore("articles", {
       comprehension: number;
       answers: QuestionAnswer[];
     }) {
-      return this.withErrorHandling(async () => {
-        const $db = this.getFirestore();
+      const { $db } = useNuxtApp();
+      if (!$db) throw new Error("Firestore not initialized");
+
+      try {
+        this.loading = true;
+        this.error = null;
+
+        // Create a reference to the user's document
         const userRef = doc($db, "users", params.userId);
+
+        // Create a reference to the user's testResults subcollection
         const testResultsRef = collection(userRef, "testResults");
+
+        // Add the new test result (timestamp is added here)
         const docRef = await addDoc(testResultsRef, {
-          ...params,
-          timestamp: new Date().toISOString(),
+          topic: params.topic,
+          language: params.language,
+          wpm: params.wpm,
+          comprehension: params.comprehension,
+          answers: params.answers,
         });
 
-        const result: TestResult = {
+        this.recentResults.unshift({
           id: docRef.id,
           ...params,
           timestamp: new Date(),
-        };
+        });
 
-        this.recentResults.unshift(result);
         return docRef.id;
-      });
+      } catch (error: any) {
+        this.error = error.message;
+        throw error;
+      } finally {
+        this.loading = false;
+      }
     },
   },
 
   getters: {
+    // Get article by ID
     getArticleById: (state) => (id: string) => {
       for (const topic of state.topics) {
         const article = topic.articles?.find((article) => article.id === id);
@@ -190,6 +250,7 @@ export const useArticlesStore = defineStore("articles", {
       return null;
     },
 
+    // Get articles by topic
     getArticlesByTopic: (state) => (topicName: string) => {
       const topic = state.topics.find((topic) => topic?.name === topicName);
       return topic?.articles || [];
