@@ -28,7 +28,7 @@
       <!-- Auth State -->
       <AuthState
         :user="authStore.user"
-        :loading="authStore.loading"
+        :loading="authStore.isLoading"
         @login="handleLogin"
         @logout="handleLogout"
       />

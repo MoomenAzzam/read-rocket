@@ -15,12 +15,19 @@ import {
   type Auth,
   type UserCredential,
 } from "firebase/auth";
-import { doc, setDoc, getFirestore, type Firestore } from "firebase/firestore";
+import {
+  doc,
+  setDoc,
+  getDocs,
+  collection,
+  getFirestore,
+  type Firestore,
+} from "firebase/firestore";
 import type { FirebaseError } from "firebase/app";
 
 interface AuthState {
   user: User | null;
-  loading: boolean;
+  isLoading: boolean;
   error: string | null;
   isAdmin: boolean;
   isInitialized: boolean;
@@ -31,7 +38,7 @@ interface AuthState {
 export const useAuthStore = defineStore("auth", {
   state: (): AuthState => ({
     user: null,
-    loading: false,
+    isLoading: false,
     error: null,
     isAdmin: false,
     isInitialized: false,
@@ -77,10 +84,6 @@ export const useAuthStore = defineStore("auth", {
 
                 // Mark resolution as complete
                 this.isResolvingAuth = false;
-                console.log("Auth state updated", {
-                  user,
-                  isAdmin: this.isAdmin,
-                });
                 resolve();
               } catch (error) {
                 console.error("Error processing auth state:", error);
@@ -247,14 +250,14 @@ export const useAuthStore = defineStore("auth", {
 
     async handleAuthOperation<T>(operation: () => Promise<T>): Promise<T> {
       try {
-        this.loading = true;
+        this.isLoading = true;
         this.error = null;
         return await operation();
       } catch (error) {
         this.handleAuthError(error as FirebaseError);
         throw error;
       } finally {
-        this.loading = false;
+        this.isLoading = false;
       }
     },
 
@@ -284,6 +287,31 @@ export const useAuthStore = defineStore("auth", {
       }
 
       this.setError(errorMessage);
+    },
+    getUserTestResults: async (userId: string) => {
+      const { $db } = useNuxtApp();
+      if (!$db) throw new Error("Firestore not initialized");
+
+      try {
+        // Create a reference to the user's testResults subcollection
+        const testResultsRef = collection($db, "users", userId, "testResults");
+
+        // Get all documents in the subcollection
+        const querySnapshot = await getDocs(testResultsRef);
+
+        // Map through the documents to create an array of results
+        const results = querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+          // Convert Firestore timestamp to JS Date if needed
+          timestamp: doc.data().timestamp?.toDate() || null,
+        }));
+
+        return results;
+      } catch (error: any) {
+        console.error("Error fetching test results:", error);
+        throw error;
+      }
     },
   },
 });

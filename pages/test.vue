@@ -18,6 +18,7 @@
       <TestContent
         v-else-if="currentStage === 'reading'"
         :paragraph="testParagraph"
+        :lang="route.query.lang"
         @finish-reading="finishReading"
       />
       <TestResults
@@ -77,6 +78,10 @@ const wpm = ref(0);
 
 // Fetch article based on topic and language
 onMounted(async () => {
+  if (!route.query.topic || !route.query.lang) {
+    router.push("/");
+    return;
+  }
   const results = await articles.fetchRandomArticleByTopic(
     route.query.topic,
     route.query.lang
@@ -141,20 +146,9 @@ const comprehensionPercentage = computed(() => {
 
 const saveResults = async () => {
   if (!authStore.user) {
-    router.push("/auth");
-    // return;
+    router.push("/");
   }
-  console.log("Saving test results:", {
-    userId: authStore?.user?.uid,
-    topic: route.query.topic,
-    language: route.query.lang,
-    wpm: wpm.value,
-    comprehension: comprehensionPercentage.value,
-    answers: questions.value.map((q) => ({
-      userAnswer: q.userAnswer,
-      correct: q.correct,
-    })),
-  });
+
 
   // Ensure required fields have values
   const testResults = {

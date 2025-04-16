@@ -1,7 +1,12 @@
 <template>
   <div class="bg-white p-8 rounded-xl shadow-md">
     <div class="prose max-w-none mb-8">
-      <p class="whitespace-pre-line text-xl">{{ paragraph }}</p>
+      <p
+        class="whitespace-pre-line text-xl"
+        :class="lang == 'ar' ? 'text-right' : ''"
+      >
+        {{ paragraph }}
+      </p>
     </div>
 
     <div class="text-center">
@@ -20,6 +25,10 @@ defineProps({
   paragraph: {
     type: String,
     required: true,
+  },
+  lang: {
+    type: String,
+    default: "en",
   },
 });
 

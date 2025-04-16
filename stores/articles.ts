@@ -24,7 +24,7 @@ export const useArticlesStore = defineStore("articles", {
   state: () => ({
     topics: [] as Topic[],
     currentArticle: null as Article | null,
-    loading: false,
+    isLoading: false,
     error: null as string | null,
     recentResults: [] as TestResult[],
   }),
@@ -36,7 +36,7 @@ export const useArticlesStore = defineStore("articles", {
 
       if (!$db) throw new Error("Firestore not initialized");
       try {
-        this.loading = true;
+        this.isLoading = true;
         const snapshot = await getDocs(collection($db, "articles"));
 
         this.topics = snapshot.docs.map((doc) => ({
@@ -47,7 +47,7 @@ export const useArticlesStore = defineStore("articles", {
         this.error = error.message;
         throw error;
       } finally {
-        this.loading = false;
+        this.isLoading = false;
       }
     },
 
@@ -56,7 +56,7 @@ export const useArticlesStore = defineStore("articles", {
       const { $db } = useNuxtApp();
       if (!$db) throw new Error("Firestore not initialized");
       try {
-        this.loading = true;
+        this.isLoading = true;
         const docRef = doc($db, "articles", id);
         const docSnap = await getDoc(docRef);
 
@@ -72,7 +72,7 @@ export const useArticlesStore = defineStore("articles", {
         this.error = error.message;
         throw error;
       } finally {
-        this.loading = false;
+        this.isLoading = false;
       }
     },
 
@@ -81,7 +81,7 @@ export const useArticlesStore = defineStore("articles", {
       const { $db } = useNuxtApp();
       if (!$db) throw new Error("Firestore not initialized");
       try {
-        this.loading = true;
+        this.isLoading = true;
         const articleRef = doc(collection($db, "articles"));
         await setDoc(articleRef, {
           ...articleData,
@@ -93,7 +93,7 @@ export const useArticlesStore = defineStore("articles", {
         this.error = error.message;
         throw error;
       } finally {
-        this.loading = false;
+        this.isLoading = false;
       }
     },
 
@@ -102,7 +102,7 @@ export const useArticlesStore = defineStore("articles", {
       const { $db } = useNuxtApp();
       if (!$db) throw new Error("Firestore not initialized");
       try {
-        this.loading = true;
+        this.isLoading = true;
         const articleRef = doc($db, "articles", id);
         await setDoc(
           articleRef,
@@ -116,7 +116,7 @@ export const useArticlesStore = defineStore("articles", {
         this.error = error.message;
         throw error;
       } finally {
-        this.loading = false;
+        this.isLoading = false;
       }
     },
 
@@ -125,7 +125,7 @@ export const useArticlesStore = defineStore("articles", {
       const { $db } = useNuxtApp();
       if (!$db) throw new Error("Firestore not initialized");
       try {
-        this.loading = true;
+        this.isLoading = true;
         await deleteDoc(doc($db, "articles", id));
         // Remove from local state
         this.topics = this.topics.map((topic) => ({
@@ -137,16 +137,15 @@ export const useArticlesStore = defineStore("articles", {
         this.error = error.message;
         throw error;
       } finally {
-        this.loading = false;
+        this.isLoading = false;
       }
     },
     async fetchRandomArticleByTopic(topic: string, lang: string) {
       const { $db } = useNuxtApp();
-      console.log(topic, lang);
       if (!$db) throw new Error("Firestore not initialized");
 
       try {
-        this.loading = true;
+        this.isLoading = true;
 
         // Create a query that filters by topic
         const articlesRef = collection($db, "articles");
@@ -191,7 +190,7 @@ export const useArticlesStore = defineStore("articles", {
         this.error = error.message;
         throw error;
       } finally {
-        this.loading = false;
+        this.isLoading = false;
       }
     },
     async saveTestResults(params: {
@@ -206,7 +205,7 @@ export const useArticlesStore = defineStore("articles", {
       if (!$db) throw new Error("Firestore not initialized");
 
       try {
-        this.loading = true;
+        this.isLoading = true;
         this.error = null;
 
         // Create a reference to the user's document
@@ -235,7 +234,7 @@ export const useArticlesStore = defineStore("articles", {
         this.error = error.message;
         throw error;
       } finally {
-        this.loading = false;
+        this.isLoading = false;
       }
     },
   },

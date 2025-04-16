@@ -11,13 +11,11 @@
         </button>
         <!-- Add more formatting buttons as needed -->
       </div>
-      <EditorContent :editor="editor" class="prose max-w-none" />
+      <!-- <EditorContent :editor="editor" class="prose max-w-none" /> -->
     </div>
   </template>
   
   <script setup>
-  import { Editor, EditorContent } from '@tiptap/vue-3'
-  import StarterKit from '@tiptap/starter-kit'
   
   const props = defineProps({
     modelValue: {
@@ -28,13 +26,7 @@
   
   const emit = defineEmits(['update:modelValue'])
   
-  const editor = new Editor({
-    content: props.modelValue,
-    extensions: [StarterKit],
-    onUpdate: () => {
-      emit('update:modelValue', editor.getHTML())
-    }
-  })
+
   
   watch(() => props.modelValue, (value) => {
     if (editor && value !== editor.getHTML()) {
