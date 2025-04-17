@@ -38,6 +38,5 @@ export default defineNuxtPlugin((nuxtApp) => {
 
   // Provide services to the app
   nuxtApp.provide("auth", auth);
-  nuxtApp.provide("googleProvider", googleProvider);
   nuxtApp.provide("db", db);
 });

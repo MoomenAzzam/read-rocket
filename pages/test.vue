@@ -52,13 +52,14 @@ import { ref, computed, onMounted, onUnmounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useArticlesStore } from "@/stores/articles";
 import { useAuthStore } from "@/stores/auth";
-
+import { useToastStore } from "@/stores/toast";
 // Components
 import TestIntro from "@/components/ReadingTestPage/TestIntro.vue";
 import TestContent from "@/components/ReadingTestPage/TestContent.vue";
 import TestResults from "@/components/ReadingTestPage/TestResults.vue";
 import QuizQuestions from "@/components/ReadingTestPage/QuizQuestions.vue";
 import QuizResults from "@/components/ReadingTestPage/QuizResults.vue";
+import { set } from "~/node_modules/nuxt/dist/app/compat/capi";
 
 const articles = useArticlesStore();
 const authStore = useAuthStore();
@@ -90,11 +91,11 @@ onMounted(async () => {
   questions.value = results?.questions || [];
 });
 
-onMounted(async () => {
-  if (!authStore.isAuthenticated) {
-    await authStore.signInAnonymously();
-  }
-});
+// onMounted(async () => {
+//   if (!authStore.isAuthenticated) {
+//     await authStore.signInAnonymously();
+//   }
+// });
 
 // Start the reading test
 const startTest = () => {
@@ -144,12 +145,9 @@ const comprehensionPercentage = computed(() => {
   return Math.round((correctCount / questions.value.length) * 100);
 });
 
+const toast = useToastStore();
+
 const saveResults = async () => {
-  if (!authStore.user) {
-    router.push("/");
-  }
-
-
   // Ensure required fields have values
   const testResults = {
     userId: authStore.user.uid,
@@ -163,10 +161,16 @@ const saveResults = async () => {
     })),
   };
 
+  if (!authStore.isAuthenticated) {
+    router.push("/auth");
+    return;
+  }
+
   // Save to Firestore
   await articles.saveTestResults(testResults);
-
-  router.push("/");
+  setTimeout(() => {
+    navigateTo("/");
+  }, 1000);
 };
 
 // Reset the test

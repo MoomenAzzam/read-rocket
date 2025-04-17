@@ -64,7 +64,6 @@
 
 <script setup lang="ts">
 import { ref } from "vue";
-
 // Mock data - replace with real data fetching
 const topics = ref([
   {
