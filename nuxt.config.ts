@@ -7,7 +7,7 @@ export default defineNuxtConfig({
   vite: {
     plugins: [tailwindcss()],
   },
-  modules: ["@pinia/nuxt"],
+  modules: ["@pinia/nuxt", "@nuxtjs/sitemap"],
   runtimeConfig: {
     public: {
       firebaseApiKey: process.env.FIREBASE_API_KEY,
@@ -61,6 +61,23 @@ export default defineNuxtConfig({
       ],
       link: [],
     },
+  },
+  ssr: true,
+  sitemap: {
+    sitemaps: [
+      {
+        path: "/sitemap-main.xml",
+        hostname: "https://read-rocket.web.app",
+        routes: async () => {
+          return ["/", "/test", "/profile", "/error"];
+        },
+      },
+      {
+        path: "/sitemap-admin.xml",
+        hostname: "https://read-rocket.web.app",
+        exclude: ["/admin", "/admin/articles/new", "/admin/edit/:id"],
+      },
+    ],
   },
   nitro: {
     preset: "static",

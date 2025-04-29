@@ -127,8 +127,6 @@
                   {{ article.content }}
                 </p>
               </div>
-
-             
             </div>
           </div>
         </div>
@@ -180,7 +178,7 @@
 
 <script setup>
 const articles = useArticlesStore();
-// const toast = useToast();
+const toast = useToast();
 
 // Delete modal state
 const showDeleteModal = ref(false);
@@ -218,14 +216,14 @@ const executeDelete = async () => {
   try {
     isDeleting.value = true;
     await articles.deleteArticle(itemToDelete.value.id);
-    console.log({
+    toast.add({
       title: "Success",
       description: "Article deleted successfully",
       icon: "material-symbols:check-circle",
       color: "green",
     });
   } catch (error) {
-    console.log({
+    toast.add({
       title: "Error",
       description: "Failed to delete article",
       icon: "material-symbols:error",

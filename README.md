@@ -1,75 +1,56 @@
-# Nuxt Minimal Starter
+# Read Rocket
 
-Look at the [Nuxt documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
+![Read Rocket](https://github.com/user-attachments/assets/cf3f3a99-e040-4c9b-b62f-6eaf061ddd27)
+
+## Overview
+
+Interactive quiz platform with multi-language support, analytics, and user authentication.
 
 ## Setup
 
-Make sure to install dependencies:
+To get started, make sure to install the required dependencies:
 
 ```bash
-# npm
+# Using npm
 npm install
-
-# pnpm
-pnpm install
-
-# yarn
-yarn install
-
-# bun
-bun install
 ```
 
 ## Development Server
 
-Start the development server on `http://localhost:3000`:
+Run the development server locally at `http://localhost:3000`:
 
 ```bash
-# npm
+# Using npm
 npm run dev
-
-# pnpm
-pnpm dev
-
-# yarn
-yarn dev
-
-# bun
-bun run dev
 ```
 
 ## Production
 
-Build the application for production:
+Build the application for production deployment:
 
 ```bash
-# npm
+# Using npm
 npm run build
-
-# pnpm
-pnpm build
-
-# yarn
-yarn build
-
-# bun
-bun run build
 ```
 
-Locally preview production build:
+Preview the production build locally:
 
 ```bash
-# npm
+# Using npm
 npm run preview
-
-# pnpm
-pnpm preview
-
-# yarn
-yarn preview
-
-# bun
-bun run preview
 ```
 
-Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
+## Live Demo
+
+Check out the live demo of the application here: [Read Rocket](https://read-rocket.web.app/)
+
+## About the Application
+
+The application provides an interactive platform to test your knowledge on various topics. Here's how it works:
+
+- Choose a topic you'd like to explore.
+- Select a language from the available options: Arabic, English, French, German, or Spanish.
+- Take a quiz to test your understanding of the topic.
+- View your results and analytics in your profile.
+- Sign up or log in using your email and password, or authenticate with your Google account.
+

@@ -24,6 +24,7 @@ import {
   type Firestore,
 } from "firebase/firestore";
 import type { FirebaseError } from "firebase/app";
+import { toast } from "vue3-toastify";
 
 interface AuthState {
   user: User | null;
@@ -52,7 +53,6 @@ export const useAuthStore = defineStore("auth", {
   },
 
   actions: {
-    // Initialize auth state listener with Promise interface
     async initAuthListener(): Promise<void> {
       try {
         const auth = this.getAuth();
@@ -62,7 +62,6 @@ export const useAuthStore = defineStore("auth", {
           throw new Error("Firebase auth not initialized");
         }
 
-        console.log("Initializing auth listener...");
         this.isInitialized = true;
         this.isResolvingAuth = true;
 
@@ -71,22 +70,18 @@ export const useAuthStore = defineStore("auth", {
             auth,
             async (user) => {
               try {
-                // Update user state
                 this.user = user;
                 this.isAdmin = user
                   ? config.public.adminId === user.uid
                   : false;
 
-                // Create user document if authenticated
                 if (user) {
                   await this.createUserDocument(user);
                 }
-
-                // Mark resolution as complete
                 this.isResolvingAuth = false;
                 resolve();
               } catch (error) {
-                console.error("Error processing auth state:", error);
+                toast.error("Error processing auth state");
                 this.setError(error.message);
                 this.isResolvingAuth = false;
                 resolve();
@@ -95,7 +90,7 @@ export const useAuthStore = defineStore("auth", {
           );
         });
       } catch (error) {
-        console.error("Failed to initialize auth listener:", error);
+        toast.error("Failed to initialize auth listener");
         this.isInitialized = false;
         this.isResolvingAuth = false;
         this.setError(error.message);
@@ -103,7 +98,6 @@ export const useAuthStore = defineStore("auth", {
       }
     },
 
-    // Cleanup auth listener
     cleanupAuthListener() {
       if (this.unsubscribeAuthListener) {
         this.unsubscribeAuthListener();
@@ -112,7 +106,6 @@ export const useAuthStore = defineStore("auth", {
       this.isInitialized = false;
     },
 
-    // Helper to create/update user document
     async createUserDocument(user: User) {
       try {
         const db = this.getFirestore();
@@ -132,12 +125,11 @@ export const useAuthStore = defineStore("auth", {
           { merge: true }
         );
       } catch (error) {
-        console.error("Error creating user document:", error);
+        toast.error("Error creating user document");
         throw error;
       }
     },
 
-    // Email/Password Registration
     async register(email: string, password: string): Promise<UserCredential> {
       return this.handleAuthOperation(async () => {
         const auth = this.getAuth();
@@ -147,45 +139,51 @@ export const useAuthStore = defineStore("auth", {
           password
         );
         await this.createUserDocument(userCredential.user);
+        toast.success("Registration successful");
         return userCredential;
       });
     },
 
-    // Email/Password Login
     async login(email: string, password: string): Promise<UserCredential> {
       return this.handleAuthOperation(async () => {
         const auth = this.getAuth();
-        return await signInWithEmailAndPassword(auth, email, password);
+        const userCredential = await signInWithEmailAndPassword(
+          auth,
+          email,
+          password
+        );
+        toast.success("Login successful");
+        return userCredential;
       });
     },
 
-    // Google Login
     async loginWithGoogle(): Promise<UserCredential> {
       return this.handleAuthOperation(async () => {
         const auth = this.getAuth();
         const googleProvider = new GoogleAuthProvider();
         const userCredential = await signInWithPopup(auth, googleProvider);
         await this.createUserDocument(userCredential.user);
+        toast.success("Google login successful");
         return userCredential;
       });
     },
 
-    // Anonymous Sign In
     async signInAnonymously(): Promise<UserCredential> {
       return this.handleAuthOperation(async () => {
         const auth = this.getAuth();
         const userCredential = await signInAnonymously(auth);
         await this.createUserDocument(userCredential.user);
+        toast.info("Signed in anonymously");
         return userCredential;
       });
     },
 
-    // Upgrade anonymous to email/password
     async upgradeToEmailPassword(
       email: string,
       password: string
     ): Promise<UserCredential> {
       if (!this.user?.isAnonymous) {
+        toast.error("Only anonymous accounts can be upgraded");
         throw new Error("Only anonymous accounts can be upgraded");
       }
 
@@ -197,13 +195,14 @@ export const useAuthStore = defineStore("auth", {
           credential
         );
         await this.createUserDocument(userCredential.user);
+        toast.success("Account upgraded with email/password");
         return userCredential;
       });
     },
 
-    // Upgrade anonymous to Google account
     async upgradeWithGoogle(): Promise<UserCredential> {
       if (!this.user?.isAnonymous) {
+        toast.error("Only anonymous accounts can be upgraded");
         throw new Error("Only anonymous accounts can be upgraded");
       }
 
@@ -219,15 +218,14 @@ export const useAuthStore = defineStore("auth", {
       });
     },
 
-    // Logout
     async logout(): Promise<void> {
       return this.handleAuthOperation(async () => {
         const auth = this.getAuth();
         await signOut(auth);
+        toast.info("Logged out successfully");
       });
     },
 
-    // Helper methods
     getAuth(): Auth {
       const { $app } = useNuxtApp();
       return getAuth($app);
@@ -240,7 +238,7 @@ export const useAuthStore = defineStore("auth", {
 
     setError(message: string): void {
       this.error = message;
-      console.error("Auth error:", message);
+      toast.error(message);
     },
 
     setUser(user: User | null): void {
@@ -264,7 +262,6 @@ export const useAuthStore = defineStore("auth", {
     handleAuthError(error: FirebaseError): void {
       let errorMessage = error.message;
 
-      // Map Firebase error codes to user-friendly messages
       switch (error.code) {
         case "auth/email-already-in-use":
           errorMessage = "This email is already registered";
@@ -288,28 +285,27 @@ export const useAuthStore = defineStore("auth", {
 
       this.setError(errorMessage);
     },
-    getUserTestResults: async (userId: string) => {
+
+    async getUserTestResults(userId: string) {
       const { $db } = useNuxtApp();
-      if (!$db) throw new Error("Firestore not initialized");
+      if (!$db) {
+        toast.error("Firestore not initialized");
+        throw new Error("Firestore not initialized");
+      }
 
       try {
-        // Create a reference to the user's testResults subcollection
         const testResultsRef = collection($db, "users", userId, "testResults");
-
-        // Get all documents in the subcollection
         const querySnapshot = await getDocs(testResultsRef);
 
-        // Map through the documents to create an array of results
         const results = querySnapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
-          // Convert Firestore timestamp to JS Date if needed
           timestamp: doc.data().timestamp?.toDate() || null,
         }));
 
         return results;
       } catch (error: any) {
-        console.error("Error fetching test results:", error);
+        toast.error("Error fetching test results");
         throw error;
       }
     },
