@@ -4,7 +4,7 @@
 
 ## Overview
 
-This project provides a minimal starter template for building applications with Nuxt. It includes essential configurations and commands to get you started quickly.
+Interactive quiz platform with multi-language support, analytics, and user authentication.
 
 ## Setup
 
