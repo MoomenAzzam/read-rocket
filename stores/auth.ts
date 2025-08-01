@@ -160,7 +160,8 @@ export const useAuthStore = defineStore("auth", {
     async loginWithGoogle(): Promise<UserCredential> {
       return this.handleAuthOperation(async () => {
         const auth = this.getAuth();
-        const googleProvider = new GoogleAuthProvider();
+        const { $googleProvider } = useNuxtApp();
+        const googleProvider = $googleProvider || new GoogleAuthProvider();
         const userCredential = await signInWithPopup(auth, googleProvider);
         await this.createUserDocument(userCredential.user);
         toast.success("Google login successful");
@@ -280,6 +281,18 @@ export const useAuthStore = defineStore("auth", {
           break;
         case "auth/too-many-requests":
           errorMessage = "Too many attempts. Please try again later";
+          break;
+        case "auth/popup-closed-by-user":
+          errorMessage = "Sign in was cancelled";
+          break;
+        case "auth/popup-blocked":
+          errorMessage = "Popup was blocked. Please allow popups for this site";
+          break;
+        case "auth/unauthorized-domain":
+          errorMessage = "This domain is not authorized for sign-in";
+          break;
+        case "auth/operation-not-allowed":
+          errorMessage = "Google sign-in is not enabled for this project";
           break;
       }
 

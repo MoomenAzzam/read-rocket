@@ -2,6 +2,7 @@
   <SplashScreen v-if="showSplash" />
   <NuxtLayout v-else>
     <NuxtPage />
+    <FirebaseDebug />
   </NuxtLayout>
 </template>
 
