@@ -3,9 +3,10 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "nuxt build",
     "dev": "nuxt dev",
+    "build": "nuxt build",
     "generate": "nuxt generate",
+    "build:firebase": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare"
   },

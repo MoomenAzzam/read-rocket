@@ -177,8 +177,10 @@
 </template>
 
 <script setup>
+import { useToastStore } from "@/stores/toast";
+
 const articles = useArticlesStore();
-const toast = useToast();
+const toast = useToastStore();
 
 // Delete modal state
 const showDeleteModal = ref(false);
